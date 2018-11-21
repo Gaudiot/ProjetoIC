@@ -104,32 +104,36 @@ function nextAssignment(arr, pos) {
     if(pos >= 0){
         if(arr[pos] === 1){
             arr[pos] = 0;
-            return nextAssignment(arr, pos--);
+            return nextAssignment(arr, --pos);
         }else if(arr[pos] === 0){
             arr[pos] = 1;
-            return arr;
+            return arr
         }
     }
     return arr;
 }
 
 //checa se é falso
-function isFalse(arr, clause){
+function isFalse(variables, clause){
+    //array copia do original
+    let arrV = variables.slice(0);
+    let arrC = clause.slice(0);
     //fazer as negações
-    for(let i = 0; i < clause.length ; i++){
-        if(parseInt(clause[i], 10) < 0){
-            clause[i] = parseInt(clause[i], 10) * -1;
-            let vari = arr[parseInt(clause[i], 10) - 1];
+    for(let i = 0; i < arrC.length ; i++){
+        if(parseInt(arrC[i], 10) < 0){
+            arrC[i] = parseInt(arrC[i], 10) * -1;
+            let vari = arrV[parseInt(arrC[i], 10) - 1];
             if(vari === 0){
-                vari = 1;
+                arrV[parseInt(arrC[i], 10) - 1] = 1;
+                return false;
             }else if(vari === 1){
-                vari = 0;
+                arrV[parseInt(arrC[i], 10) - 1] = 0;
             }
         }
     }
     //checa se tem como ser falso
-    for(let i = 0 ; i < clause.length; i++){
-        if(arr[clause[i] - 1] === 1){
+    for(let i = 0 ; i < arrC.length; i++){
+        if(arrV[parseInt(arrC[i], 10) - 1] === 1){
             return false;
         }
     }
@@ -154,5 +158,6 @@ function doSolve(variables, clauses) {
     if (isSat) {
         result.satisfyingAssignment = variables;
     }
+    console.log(variables);
     return result
 }
