@@ -5,10 +5,7 @@ function readFormula(fileName) {
 
     let lines = text.toString().split('\n');
     let clauses = readClauses(lines);
-    let numberVariables = readVariables(lines);
-
-    //criacao da array inicial de variáveis
-    let variables = new Array(parseInt(numberVariables, 10));
+    let variables = readVariables(lines);
     variables.fill(0);
 
     let specOk = checkProblemSpecification(lines, clauses, variables);
@@ -59,7 +56,7 @@ function readClauses(lines){
         let first = lines[f].charAt(0) + lines[f].charAt(1);
         if(!isNaN(parseInt(first, 10))){
             let last = lines[f].charAt(lines[f].length - 1);
-            let temp = lines[f].split(' ');
+            let temp = lines[f].split(' ').map(Number);
             arr = arr.concat(temp);
             if(parseInt(last, 10) === 0){
                 arr.pop();
@@ -72,20 +69,23 @@ function readClauses(lines){
     return clauses;
 }
 
-//ler a quantidade de variaveis(CHECKED)
+//criar a array de variaveis(CHECKED)
 function readVariables(lines){
     for(let i = 0 ; i < lines.length ; i++){
         if(lines[i].charAt(0) === 'p'){
             let parameters = lines[i].split(' ');
-            return parameters[2];
+            return new Array(parseInt(parameters[2], 10));
         }
     }
 }
 
 //(CHECKED)
 exports.solve = function(fileName) {
+    var start = new Date;
     let formula = readFormula(fileName);
     let result = doSolve(formula.variables, formula.clauses);
+    var end = new Date;
+    console.log('time: ' + (end - start)/1000)
     return result;
 }
 
@@ -115,25 +115,13 @@ function nextAssignment(arr, pos) {
 
 //checa se é falso
 function isFalse(variables, clause){
-    //array copia do original
-    let arrV = variables.slice(0);
-    let arrC = clause.slice(0);
     //fazer as negações
-    for(let i = 0; i < arrC.length ; i++){
-        if(parseInt(arrC[i], 10) < 0){
-            arrC[i] = parseInt(arrC[i], 10) * -1;
-            let vari = arrV[parseInt(arrC[i], 10) - 1];
-            if(vari === 0){
-                arrV[parseInt(arrC[i], 10) - 1] = 1;
+    for(let i = 0; i < clause.length ; i++){
+        if(clause[i] < 0){
+            if(variables[(clause[i] * -1) - 1] === 0){
                 return false;
-            }else if(vari === 1){
-                arrV[parseInt(arrC[i], 10) - 1] = 0;
             }
-        }
-    }
-    //checa se tem como ser falso
-    for(let i = 0 ; i < arrC.length; i++){
-        if(arrV[parseInt(arrC[i], 10) - 1] === 1){
+        }else if(variables[clause[i] - 1] === 1){
             return false;
         }
     }
