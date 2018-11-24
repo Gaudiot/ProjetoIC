@@ -3,7 +3,7 @@ function readFormula(fileName) {
     const fs = require('fs');
     let text = fs.readFileSync(fileName, 'utf8');
 
-    let lines = text.toString().split('\n');
+    let lines = text.split('\n');
     let clauses = readClauses(lines);
     let variables = readVariables(lines);
     variables.fill(0);
@@ -18,7 +18,7 @@ function readFormula(fileName) {
     return result
 }
 
-//verifica se é viável continuar o teste(CHECKED)
+//verifica se é viável continuar o teste
 function checkProblemSpecification(lines, clauses, variables) {
     let value;
     let max = 0;
@@ -50,7 +50,6 @@ function checkProblemSpecification(lines, clauses, variables) {
 //ler as clausulas da questao(CHECKED)
 function readClauses(lines){
     let clauses = new Array();
-    let i = 0;
     let arr = [];
     for(let f = 0 ; f < lines.length ; f++){
         let first = lines[f].charAt(0) + lines[f].charAt(1);
@@ -60,9 +59,8 @@ function readClauses(lines){
             arr = arr.concat(temp);
             if(parseInt(last, 10) === 0){
                 arr.pop();
-                clauses[i] = arr;
+                clauses[clauses.length] = arr;
                 arr = [];
-                i++;
             }
         }
     }
@@ -71,28 +69,37 @@ function readClauses(lines){
 
 //criar a array de variaveis(CHECKED)
 function readVariables(lines){
+    let max = 0;
     for(let i = 0 ; i < lines.length ; i++){
         if(lines[i].charAt(0) === 'p'){
             let parameters = lines[i].split(' ');
             return new Array(parseInt(parameters[2], 10));
+        }else if(lines[i].charAt(0) !== 'c' ){
+            let divide = lines[i].split(' ');
+            for(let f = 0 ; f < divide.length ; f++){
+                if(Math.abs(divide[f]) > max){
+                    max = Math.abs(divide[f]);
+                }
+            }
         }
     }
+    return new Array(max);
 }
 
 //(CHECKED)
 exports.solve = function(fileName) {
-    var start = new Date;
+    let start = new Date;
     let formula = readFormula(fileName);
     let result = doSolve(formula.variables, formula.clauses);
-    var end = new Date;
-    console.log('time: ' + (end - start)/1000)
+    let end = new Date;
+    console.log('time: ' + (end - start)/1000);
     return result;
 }
 
 //Funcao para verificar finalizacao das possibilidades(CHECKED)
-function hasNextAssignment(arr){
-    for(let i = 0 ; i < arr.length ; i++){
-        if(arr[i] === 1){
+function hasNextAssignment(variables){
+    for(let i = 0 ; i < variables.length ; i++){
+        if(variables[i] === 1){
             return true;
         }
     }
@@ -100,24 +107,25 @@ function hasNextAssignment(arr){
 }
 
 //Recebe a possibilidade atual e retorna a próxima(CHECKED)
-function nextAssignment(arr, pos) {
+function nextAssignment(variables, pos) {
     if(pos >= 0){
-        if(arr[pos] === 1){
-            arr[pos] = 0;
-            return nextAssignment(arr, --pos);
-        }else if(arr[pos] === 0){
-            arr[pos] = 1;
-            return arr
+        if(variables[pos] === 1){
+            variables[pos] = 0;
+            return nextAssignment(variables, --pos);
+        }else if(variables[pos] === 0){
+            variables[pos] = 1;
+            return variables
         }
     }
-    return arr;
+    return variables;
 }
 
-//checa se é falso
+//checa se é falso(CHECKED)
 function isFalse(variables, clause){
-    //fazer as negações
     for(let i = 0; i < clause.length ; i++){
-        if(clause[i] < 0){
+        if(clause[i] === 0){
+            continue;
+        }else if(clause[i] < 0){
             if(variables[(clause[i] * -1) - 1] === 0){
                 return false;
             }
@@ -128,7 +136,7 @@ function isFalse(variables, clause){
     return true;
 }
 
-//Resolve o SAT
+//Resolve o SAT(CHECKED)
 function doSolve(variables, clauses) {
     let isSat = false;
     do {
@@ -146,6 +154,6 @@ function doSolve(variables, clauses) {
     if (isSat) {
         result.satisfyingAssignment = variables;
     }
-    console.log(variables);
+    console.log(result.satisfyingAssignment);
     return result
 }
