@@ -88,11 +88,11 @@ function readVariables(lines){
 
 //(CHECKED)
 exports.solve = function(fileName) {
-    let start = new Date;
+    //let start = new Date;
     let formula = readFormula(fileName);
     let result = doSolve(formula.variables, formula.clauses);
-    let end = new Date;
-    console.log('time: ' + (end - start)/1000);
+    //let end = new Date;
+    //console.log('time: ' + (end - start)/1000);
     return result;
 }
 
@@ -154,6 +154,6 @@ function doSolve(variables, clauses) {
     if (isSat) {
         result.satisfyingAssignment = variables;
     }
-    console.log(result.satisfyingAssignment);
+    //console.log(result.satisfyingAssignment);
     return result
 }
